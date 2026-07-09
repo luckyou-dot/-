@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 应用主题（Compose 内通过 JiYiBiTheme 动态切换明暗，此处仅做启动屏占位） -->
+    <style name="Theme.JiYiBi" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

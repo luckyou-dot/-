@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记一笔 · UI 多版本对比</title>
+<style>
+  /* ============ 主题变量（默认：紫粉活力版） ============ */
+  :root {
+    --bg-page: linear-gradient(135deg, #FAF6FF 0%, #FFF0F6 50%, #F0F8FF 100%);
+    --bg-phone: linear-gradient(180deg, #FAF6FF 0%, #FFFBFE 100%);
+    --primary: #6750A4;
+    --primary-2: #E91E63;
+    --gradient-title: linear-gradient(135deg, #6750A4, #E91E63);
+    --gradient-card: linear-gradient(135deg, #6750A4 0%, #9C27B0 50%, #E91E63 100%);
+    --card-shadow: rgba(156, 39, 176, 0.25);
+    --gradient-fab: linear-gradient(135deg, #6750A4, #E91E63);
+    --fab-shadow: rgba(233, 30, 99, 0.4);
+    --pill-active: linear-gradient(135deg, #6750A4, #9C27B0);
+    --pill-active-shadow: rgba(103, 80, 164, 0.3);
+    --icon-bg-1: linear-gradient(135deg, #FFE0B2, #FFCC80);
+    --icon-bg-2: linear-gradient(135deg, #C8E6C9, #A5D6A7);
+    --icon-bg-3: linear-gradient(135deg, #BBDEFB, #90CAF9);
+    --icon-bg-4: linear-gradient(135deg, #F8BBD0, #F48FB1);
+    --income-bg: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    --expense-bg: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    --theme-name: "紫粉活力";
+  }
+  [data-theme="mint"] {
+    --bg-page: linear-gradient(135deg, #E8F8F5 0%, #F0FBF6 50%, #E0F7FA 100%);
+    --bg-phone: linear-gradient(180deg, #E8F8F5 0%, #FFFBFE 100%);
+    --primary: #00A6A6;
+    --primary-2: #00C853;
+    --gradient-title: linear-gradient(135deg, #00A6A6, #00C853);
+    --gradient-card: linear-gradient(135deg, #00897B 0%, #00A6A6 50%, #00C853 100%);
+    --card-shadow: rgba(0, 166, 166, 0.25);
+    --gradient-fab: linear-gradient(135deg, #00A6A6, #00C853);
+    --fab-shadow: rgba(0, 200, 83, 0.4);
+    --pill-active: linear-gradient(135deg, #00A6A6, #00BFA5);
+    --pill-active-shadow: rgba(0, 166, 166, 0.3);
+    --theme-name: "薄荷清新";
+  }
+  [data-theme="sunset"] {
+    --bg-page: linear-gradient(135deg, #FFF3E0 0%, #FFF8E1 50%, #FBE9E7 100%);
+    --bg-phone: linear-gradient(180deg, #FFF3E0 0%, #FFFBFE 100%);
+    --primary: #FF6F00;
+    --primary-2: #FF5252;
+    --gradient-title: linear-gradient(135deg, #FF6F00, #FF5252);
+    --gradient-card: linear-gradient(135deg, #F57C00 0%, #FF6F00 50%, #FF5252 100%);
+    --card-shadow: rgba(255, 111, 0, 0.25);
+    --gradient-fab: linear-gradient(135deg, #FF6F00, #FF5252);
+    --fab-shadow: rgba(255, 82, 82, 0.4);
+    --pill-active: linear-gradient(135deg, #FF6F00, #FF9800);
+    --pill-active-shadow: rgba(255, 111, 0, 0.3);
+    --theme-name: "暖阳治愈";
+  }
+  [data-theme="morandi"] {
+    --bg-page: linear-gradient(135deg, #ECE5E0 0%, #E8E6E1 50%, #E0E4E0 100%);
+    --bg-phone: linear-gradient(180deg, #F5F3F0 0%, #FAFAF8 100%);
+    --primary: #7A8B7D;
+    --primary-2: #A8A29E;
+    --gradient-title: linear-gradient(135deg, #7A8B7D, #9C8A7C);
+    --gradient-card: linear-gradient(135deg, #8B9D8E 0%, #9C8A7C 50%, #B8AFA6 100%);
+    --card-shadow: rgba(122, 139, 125, 0.2);
+    --gradient-fab: linear-gradient(135deg, #7A8B7D, #9C8A7C);
+    --fab-shadow: rgba(156, 138, 124, 0.35);
+    --pill-active: linear-gradient(135deg, #7A8B7D, #9C8A7C);
+    --pill-active-shadow: rgba(122, 139, 125, 0.25);
+    --theme-name: "莫兰迪高级";
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-page);
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+    color: #1C1B1F;
+    transition: background 0.5s;
+  }
+
+  /* 顶部标题 + 版本切换 */
+  .header { text-align: center; max-width: 1400px; margin: 0 auto 32px; }
+  .header h1 {
+    font-size: 32px;
+    background: var(--gradient-title);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 10px; font-weight: 800;
+    transition: all 0.5s;
+  }
+  .header p { color: #49454F; font-size: 15px; margin-bottom: 24px; }
+  .theme-tabs {
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  }
+  .theme-tab {
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    background: #fff;
+    color: #49454F;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .theme-tab .swatch {
+    width: 16px; height: 16px; border-radius: 4px;
+  }
+  .theme-tab.active {
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
+  }
+  .theme-tab[data-target="vibrant"].active { background: linear-gradient(135deg, #6750A4, #E91E63); }
+  .theme-tab[data-target="mint"].active { background: linear-gradient(135deg, #00A6A6, #00C853); }
+  .theme-tab[data-target="sunset"].active { background: linear-gradient(135deg, #FF6F00, #FF5252); }
+  .theme-tab[data-target="morandi"].active { background: linear-gradient(135deg, #7A8B7D, #9C8A7C); }
+  .theme-tab:not(.active):hover { transform: translateY(-2px); }
+  .theme-desc {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #9E9E9E;
+  }
+  .theme-desc b { color: var(--primary); }
+
+  /* 手机展示区 */
+  .screens {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 40px;
+    max-width: 1500px; margin: 0 auto;
+  }
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; }
+  .phone-label {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    margin-bottom: 16px; padding: 6px 16px;
+    background: rgba(0,0,0,0.04); border-radius: 999px;
+    transition: all 0.5s;
+  }
+  .phone {
+    width: 375px; height: 760px;
+    background: #FFFBFE;
+    border-radius: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06);
+    overflow: hidden; position: relative;
+    border: 8px solid #1C1B1F;
+  }
+  .phone-content {
+    width: 100%; height: 100%; overflow-y: auto;
+    background: var(--bg-phone);
+    transition: background 0.5s;
+  }
+  .phone-content::-webkit-scrollbar { width: 0; }
+
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 24px 6px; font-size: 13px; font-weight: 600;
+  }
+  .appbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 20px 12px;
+  }
+  .appbar-title {
+    font-size: 22px; font-weight: 800;
+    background: var(--gradient-title);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    transition: all 0.5s;
+  }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--primary); cursor: pointer;
+    transition: all 0.5s;
+  }
+  .content { padding: 0 16px 100px; }
+
+  .search-field {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border-radius: 20px; padding: 14px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 6%, transparent);
+    border: 2px solid transparent;
+    transition: all 0.5s;
+  }
+  .search-field input {
+    flex: 1; border: none; outline: none; font-size: 15px; background: transparent;
+  }
+  .search-field input::placeholder { color: #9E9E9E; }
+  .search-icon { color: var(--primary); font-size: 18px; transition: color 0.5s; }
+
+  .pill-row {
+    display: flex; gap: 8px; margin-bottom: 16px;
+    overflow-x: auto; padding-bottom: 4px;
+  }
+  .pill-row::-webkit-scrollbar { height: 0; }
+  .pill {
+    padding: 8px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+    background: #fff; color: #49454F;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    cursor: pointer; transition: all 0.3s;
+  }
+  .pill.active {
+    background: var(--pill-active);
+    color: #fff;
+    box-shadow: 0 4px 12px var(--pill-active-shadow);
+    transition: all 0.5s;
+  }
+
+  .summary-card {
+    background: var(--gradient-card);
+    border-radius: 24px; padding: 24px 20px;
+    color: #fff; margin-bottom: 16px;
+    box-shadow: 0 12px 32px var(--card-shadow);
+    position: relative; overflow: hidden;
+    transition: all 0.5s;
+  }
+  .summary-card::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+  .summary-card::after {
+    content: ''; position: absolute; bottom: -30px; left: -20px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.08); border-radius: 50%;
+  }
+  .summary-label {
+    font-size: 13px; opacity: 0.9; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .summary-amount {
+    font-size: 34px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;
+  }
+  .budget-progress {
+    background: rgba(255,255,255,0.25); height: 8px;
+    border-radius: 999px; overflow: hidden; margin-bottom: 8px;
+  }
+  .budget-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFB300, #FF6E40);
+    border-radius: 999px; width: 65%;
+    animation: fillProgress 1.5s ease-out;
+  }
+  @keyframes fillProgress { from { width: 0; } }
+  .budget-text {
+    font-size: 12px; opacity: 0.9;
+    display: flex; justify-content: space-between;
+  }
+
+  .ie-card {
+    background: #fff; border-radius: 24px; padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 6%, transparent);
+    display: flex; gap: 12px; transition: box-shadow 0.5s;
+  }
+  .ie-item {
+    flex: 1; padding: 16px; border-radius: 16px;
+    text-align: center; cursor: pointer; transition: transform 0.2s;
+  }
+  .ie-item:active { transform: scale(0.96); }
+  .ie-item.income { background: var(--income-bg); }
+  .ie-item.expense { background: var(--expense-bg); }
+  .ie-item .label { font-size: 12px; color: #49454F; margin-bottom: 6px; font-weight: 500; }
+  .ie-item .amount { font-size: 18px; font-weight: 800; }
+  .ie-item.income .amount { color: #00C853; }
+  .ie-item.expense .amount { color: #FF1744; }
+
+  .heatmap-card {
+    background: #fff; border-radius: 24px; padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 6%, transparent);
+    transition: box-shadow 0.5s;
+  }
+  .heatmap-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 12px;
+  }
+  .heatmap-title {
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .heatmap-sub { font-size: 11px; color: #9E9E9E; }
+  .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .heat-cell {
+    aspect-ratio: 1; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .heat-cell:active { transform: scale(0.85); }
+  .heat-0 { background: color-mix(in srgb, var(--primary) 8%, #fff); color: #9E9E9E; }
+  .heat-1 { background: #C8E6C9; color: #2E7D32; }
+  .heat-2 { background: #66BB6A; color: #fff; }
+  .heat-3 { background: #43A047; color: #fff; }
+  .heat-4 { background: #2E7D32; color: #fff; }
+
+  .section-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin: 8px 4px 12px;
+  }
+  .section-title { font-size: 16px; font-weight: 800; }
+  .section-link { font-size: 13px; color: var(--primary); font-weight: 600; transition: color 0.5s; }
+
+  .tx-item {
+    background: #fff; border-radius: 16px; padding: 12px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .tx-item:active { transform: scale(0.98); }
+  .tx-icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-title {
+    font-size: 14px; font-weight: 600; margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tx-sub {
+    font-size: 11px; color: #9E9E9E;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tx-amount { font-size: 15px; font-weight: 800; white-space: nowrap; }
+  .tx-amount.expense { color: #FF1744; }
+  .tx-amount.income { color: #00C853; }
+
+  .fab {
+    position: absolute; bottom: 90px; right: 20px;
+    background: var(--gradient-fab);
+    color: #fff; border: none; border-radius: 20px;
+    padding: 14px 20px; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 8px 24px var(--fab-shadow);
+    cursor: pointer; transition: all 0.5s;
+  }
+  .fab:active { transform: scale(0.94); }
+
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 12px 16px 20px;
+    display: flex; justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 12px;
+    cursor: pointer; transition: all 0.3s;
+    color: #9E9E9E;
+  }
+  .nav-item.active {
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    transition: all 0.5s;
+  }
+  .nav-icon { font-size: 22px; }
+  .nav-label { font-size: 11px; font-weight: 600; }
+
+  /* 统计页 */
+  .tab-row {
+    display: flex; background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border-radius: 16px; padding: 4px; margin-bottom: 16px;
+    transition: background 0.5s;
+  }
+  .tab-item {
+    flex: 1; text-align: center; padding: 8px; border-radius: 12px;
+    font-size: 13px; font-weight: 600; color: #49454F;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tab-item.active {
+    background: #fff; color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: color 0.5s;
+  }
+  .stat-summary {
+    background: var(--gradient-card);
+    border-radius: 24px; padding: 20px; color: #fff;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px var(--card-shadow);
+    position: relative; overflow: hidden;
+    transition: all 0.5s;
+  }
+  .stat-summary::before {
+    content: ''; position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+  .stat-col .label { font-size: 12px; opacity: 0.9; }
+  .stat-col .val { font-size: 24px; font-weight: 800; }
+  .stat-col.right { text-align: right; }
+  .stat-col.right .val { font-size: 18px; }
+  .change-chips { display: flex; gap: 8px; }
+  .change-chip {
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+  }
+
+  .chart-card {
+    background: #fff; border-radius: 24px; padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 6%, transparent);
+    transition: box-shadow 0.5s;
+  }
+  .chart-title {
+    font-size: 14px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .pie-chart {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: conic-gradient(
+      #FF5252 0% 35%, #FFB300 35% 55%, #26C281 55% 70%, var(--primary) 70% 85%, #00BCD4 85% 100%
+    );
+    margin: 0 auto 16px; position: relative;
+    transition: background 0.5s;
+  }
+  .pie-chart::after {
+    content: ''; position: absolute; top: 30%; left: 30%;
+    width: 40%; height: 40%; background: #fff; border-radius: 50%;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; font-size: 13px;
+  }
+  .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+  .legend-name { flex: 1; color: #49454F; }
+  .legend-val { font-weight: 700; }
+
+  /* 配色信息卡 */
+  .palette-info {
+    max-width: 1400px; margin: 48px auto 0;
+    background: #fff; border-radius: 24px; padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .palette-info h3 {
+    font-size: 18px; font-weight: 800; margin-bottom: 16px;
+    color: var(--primary); transition: color 0.5s;
+  }
+  .palette-swatches {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .palette-swatch {
+    flex: 1; min-width: 120px;
+    border-radius: 16px; padding: 16px;
+    color: #fff; text-align: center;
+  }
+  .palette-swatch .name { font-size: 12px; opacity: 0.9; margin-bottom: 4px; }
+  .palette-swatch .hex { font-size: 13px; font-weight: 700; }
+  .palette-features {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .palette-feature {
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    color: var(--primary);
+    transition: all 0.5s;
+  }
+
+  .note {
+    text-align: center; margin-top: 40px; padding: 24px;
+    color: #9E9E9E; font-size: 14px; max-width: 800px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body data-theme="vibrant">
+
+<div class="header">
+  <h1>记一笔 · UI 多版本对比</h1>
+  <p>点击下方标签切换 4 种设计风格，对比同一界面的不同视觉效果</p>
+  <div class="theme-tabs">
+    <div class="theme-tab active" data-target="vibrant" onclick="switchTheme('vibrant', this)">
+      <span class="swatch" style="background:linear-gradient(135deg,#6750A4,#E91E63)"></span>
+      紫粉活力
+    </div>
+    <div class="theme-tab" data-target="mint" onclick="switchTheme('mint', this)">
+      <span class="swatch" style="background:linear-gradient(135deg,#00A6A6,#00C853)"></span>
+      薄荷清新
+    </div>
+    <div class="theme-tab" data-target="sunset" onclick="switchTheme('sunset', this)">
+      <span class="swatch" style="background:linear-gradient(135deg,#FF6F00,#FF5252)"></span>
+      暖阳治愈
+    </div>
+    <div class="theme-tab" data-target="morandi" onclick="switchTheme('morandi', this)">
+      <span class="swatch" style="background:linear-gradient(135deg,#7A8B7D,#9C8A7C)"></span>
+      莫兰迪高级
+    </div>
+  </div>
+  <div class="theme-desc">当前主题：<b id="themeName">紫粉活力版</b> · 鲜活紫粉渐变，年轻活力，适合追求时尚感的用户</div>
+</div>
+
+<div class="screens">
+
+  <!-- 首页 -->
+  <div class="phone-wrap">
+    <div class="phone-label">🏠 首页</div>
+    <div class="phone">
+      <div class="phone-content">
+        <div class="status-bar"><span>9:41</span><span>📶 📡 🔋</span></div>
+        <div class="appbar">
+          <div class="appbar-title">记一笔 ✨</div>
+          <div class="icon-btn">🔍</div>
+        </div>
+        <div class="content">
+          <div class="search-field">
+            <span class="search-icon">🔍</span>
+            <input placeholder="搜索交易/分类/备注" />
+            <span style="color:#9E9E9E">🎤</span>
+          </div>
+          <div class="pill-row">
+            <div class="pill active">今天</div>
+            <div class="pill">昨天</div>
+            <div class="pill">本周</div>
+            <div class="pill">本月</div>
+            <div class="pill">📅 自选</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">📊 今日支出</div>
+            <div class="summary-amount">¥128.50</div>
+            <div class="budget-progress"><div class="budget-progress-fill"></div></div>
+            <div class="budget-text">
+              <span>已用 ¥1,856 / 预算 ¥3,000</span><span>62%</span>
+            </div>
+          </div>
+          <div class="ie-card">
+            <div class="ie-item income">
+              <div class="label">💰 本月收入</div>
+              <div class="amount">¥12,500</div>
+            </div>
+            <div class="ie-item expense">
+              <div class="label">💸 本月支出</div>
+              <div class="amount">¥1,856</div>
+            </div>
+          </div>
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <div class="heatmap-title">🔥 本月日历热力图</div>
+              <div class="heatmap-sub">颜色深浅 = 支出强度</div>
+            </div>
+            <div class="heatmap-grid">
+              <div class="heat-cell heat-0">1</div><div class="heat-cell heat-1">2</div>
+              <div class="heat-cell heat-2">3</div><div class="heat-cell heat-0">4</div>
+              <div class="heat-cell heat-3">5</div><div class="heat-cell heat-1">6</div>
+              <div class="heat-cell heat-0">7</div><div class="heat-cell heat-2">8</div>
+              <div class="heat-cell heat-4">9</div><div class="heat-cell heat-1">10</div>
+              <div class="heat-cell heat-0">11</div><div class="heat-cell heat-2">12</div>
+              <div class="heat-cell heat-3">13</div><div class="heat-cell heat-1">14</div>
+              <div class="heat-cell heat-0">15</div><div class="heat-cell heat-2">16</div>
+              <div class="heat-cell heat-1">17</div><div class="heat-cell heat-0">18</div>
+              <div class="heat-cell heat-3">19</div><div class="heat-cell heat-2">20</div>
+              <div class="heat-cell heat-1">21</div>
+            </div>
+          </div>
+          <div class="section-header">
+            <div class="section-title">📝 最近交易</div>
+            <div class="section-link">查看全部 →</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--icon-bg-1)">🍔</div>
+            <div class="tx-info">
+              <div class="tx-title">午餐 · 麦当劳</div>
+              <div class="tx-sub">12:30 · 微信 · 支出</div>
+            </div>
+            <div class="tx-amount expense">-¥38.50</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--icon-bg-2)">💵</div>
+            <div class="tx-info">
+              <div class="tx-title">工资入账</div>
+              <div class="tx-sub">10:00 · 招商银行 · 收入</div>
+            </div>
+            <div class="tx-amount income">+¥12,500</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--icon-bg-3)">🚇</div>
+            <div class="tx-info">
+              <div class="tx-title">地铁通勤</div>
+              <div class="tx-sub">08:15 · 支付宝 · 支出</div>
+            </div>
+            <div class="tx-amount expense">-¥6.00</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon" style="background:var(--icon-bg-4)">☕</div>
+            <div class="tx-info">
+              <div class="tx-title">星巴克咖啡</div>
+              <div class="tx-sub">07:45 · 微信 · 支出</div>
+            </div>
+            <div class="tx-amount expense">-¥35.00</div>
+          </div>
+        </div>
+        <button class="fab">✏️ 记一笔</button>
+        <div class="bottom-nav">
+          <div class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">首页</span></div>
+          <div class="nav-item"><span class="nav-icon">📊</span><span class="nav-label">统计</span></div>
+          <div class="nav-item"><span class="nav-icon">💰</span><span class="nav-label">预算</span></div>
+          <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">我的</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计页 -->
+  <div class="phone-wrap">
+    <div class="phone-label">📊 统计</div>
+    <div class="phone">
+      <div class="phone-content">
+        <div class="status-bar"><span>9:41</span><span>📶 📡 🔋</span></div>
+        <div class="appbar">
+          <div class="appbar-title">统计 📈</div>
+          <div class="icon-btn">📤</div>
+        </div>
+        <div class="content">
+          <div class="tab-row">
+            <div class="tab-item">日</div>
+            <div class="tab-item">周</div>
+            <div class="tab-item active">月</div>
+            <div class="tab-item">年</div>
+          </div>
+          <div class="stat-summary">
+            <div class="stat-row">
+              <div class="stat-col">
+                <div class="label">💸 本月支出</div>
+                <div class="val">¥1,856</div>
+              </div>
+              <div class="stat-col right">
+                <div class="label">💰 本月收入</div>
+                <div class="val">¥12,500</div>
+              </div>
+            </div>
+            <div class="change-chips">
+              <div class="change-chip">📈 环比 +12%</div>
+              <div class="change-chip">📉 同比 -8%</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🥧 分类占比</div>
+            <div class="pie-chart"></div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#FF5252"></div>
+              <div class="legend-name">🍔 餐饮</div>
+              <div class="legend-val">¥649 · 35%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#FFB300"></div>
+              <div class="legend-name">🚇 交通</div>
+              <div class="legend-val">¥372 · 20%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#26C281"></div>
+              <div class="legend-name">🛒 购物</div>
+              <div class="legend-val">¥279 · 15%</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">📉 支出趋势 · 日均 ¥62</div>
+            <svg width="100%" height="120" viewBox="0 0 300 120" style="margin-top:8px">
+              <defs>
+                <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0 80 L 30 70 L 60 90 L 90 60 L 120 75 L 150 40 L 180 65 L 210 50 L 240 70 L 270 45 L 300 55 L 300 120 L 0 120 Z" fill="var(--primary)" fill-opacity="0.15"/>
+              <path d="M 0 80 L 30 70 L 60 90 L 90 60 L 120 75 L 150 40 L 180 65 L 210 50 L 240 70 L 270 45 L 300 55" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="150" cy="40" r="5" fill="#FF5252"/>
+              <text x="150" y="28" text-anchor="middle" fill="#FF5252" font-size="11" font-weight="bold">¥186</text>
+            </svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">💳 各账户消费占比</div>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+              <span style="width:50px;font-size:12px">微信</span>
+              <div style="flex:1;height:6px;background:#F5F0FA;border-radius:3px;overflow:hidden">
+                <div style="width:45%;height:100%;background:linear-gradient(90deg,#43A047,#66BB6A)"></div>
+              </div>
+              <span style="font-size:12px;font-weight:600">¥835</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+              <span style="width:50px;font-size:12px">支付宝</span>
+              <div style="flex:1;height:6px;background:#F5F0FA;border-radius:3px;overflow:hidden">
+                <div style="width:30%;height:100%;background:linear-gradient(90deg,#1E88E5,#42A5F5)"></div>
+              </div>
+              <span style="font-size:12px;font-weight:600">¥557</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+              <span style="width:50px;font-size:12px">现金</span>
+              <div style="flex:1;height:6px;background:#F5F0FA;border-radius:3px;overflow:hidden">
+                <div style="width:25%;height:100%;background:linear-gradient(90deg,#FFB300,#FFCA28)"></div>
+              </div>
+              <span style="font-size:12px;font-weight:600">¥464</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">首页</span></div>
+          <div class="nav-item active"><span class="nav-icon">📊</span><span class="nav-label">统计</span></div>
+          <div class="nav-item"><span class="nav-icon">💰</span><span class="nav-label">预算</span></div>
+          <div class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">我的</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 配色信息卡 -->
+<div class="palette-info">
+  <h3 id="paletteTitle">🎨 紫粉活力版 · 配色方案</h3>
+  <div class="palette-swatches" id="paletteSwatches"></div>
+  <div class="palette-features" id="paletteFeatures"></div>
+</div>
+
+<div class="note">
+  💡 点击顶部标签切换 4 种设计风格，观察同一界面的视觉差异。<br>
+  选定喜欢的风格后告诉我，我会将完整设计（5个页面）落实到 Android Compose 代码。
+</div>
+
+<script>
+const themeData = {
+  vibrant: {
+    name: '紫粉活力版',
+    desc: '鲜活紫粉渐变，年轻活力，适合追求时尚感的用户',
+    swatches: [
+      { name: '主色', hex: '#6750A4', bg: '#6750A4' },
+      { name: '辅色', hex: '#E91E63', bg: '#E91E63' },
+      { name: '渐变中', hex: '#9C27B0', bg: '#9C27B0' },
+      { name: '收入', hex: '#00C853', bg: '#00C853' },
+      { name: '支出', hex: '#FF1744', bg: '#FF1744' },
+    ],
+    features: ['紫粉渐变主色', '圆润24px圆角', '彩色卡片分组', 'Emoji语义图标', '柔和阴影', '年轻时尚']
+  },
+  mint: {
+    name: '薄荷清新版',
+    desc: '青绿薄荷色调，清新自然，适合喜欢清爽简洁风格的用户',
+    swatches: [
+      { name: '主色', hex: '#00A6A6', bg: '#00A6A6' },
+      { name: '辅色', hex: '#00C853', bg: '#00C853' },
+      { name: '渐变中', hex: '#00BFA5', bg: '#00BFA5' },
+      { name: '收入', hex: '#00C853', bg: '#00C853' },
+      { name: '支出', hex: '#FF1744', bg: '#FF1744' },
+    ],
+    features: ['青绿自然色调', '清新护眼', '自然渐变', '薄荷活力感', '清爽简洁', '自然舒适']
+  },
+  sunset: {
+    name: '暖阳治愈版',
+    desc: '橙红暖阳色调，温暖治愈，适合喜欢温馨感的用户',
+    swatches: [
+      { name: '主色', hex: '#FF6F00', bg: '#FF6F00' },
+      { name: '辅色', hex: '#FF5252', bg: '#FF5252' },
+      { name: '渐变中', hex: '#FF9800', bg: '#FF9800' },
+      { name: '收入', hex: '#00C853', bg: '#00C853' },
+      { name: '支出', hex: '#FF1744', bg: '#FF1744' },
+    ],
+    features: ['橙红暖阳色调', '温暖治愈感', '活力渐变', '温馨舒适', '阳光活力', '亲和力强']
+  },
+  morandi: {
+    name: '莫兰迪高级版',
+    desc: '低饱和度灰调，高级优雅，适合追求质感和品味的用户',
+    swatches: [
+      { name: '主色', hex: '#7A8B7D', bg: '#7A8B7D' },
+      { name: '辅色', hex: '#9C8A7C', bg: '#9C8A7C' },
+      { name: '渐变中', hex: '#8B9D8E', bg: '#8B9D8E' },
+      { name: '收入', hex: '#00C853', bg: '#00C853' },
+      { name: '支出', hex: '#FF1744', bg: '#FF1744' },
+    ],
+    features: ['莫兰迪低饱和度', '高级灰调质感', '优雅内敛', '文艺范', '高级感', '低对比舒适']
+  }
+};
+
+function switchTheme(theme, tab) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  
+  const data = themeData[theme];
+  document.getElementById('themeName').textContent = data.name;
+  document.querySelector('.theme-desc b').textContent = data.name;
+  document.querySelector('.theme-desc').innerHTML = `当前主题：<b>${data.name}</b> · ${data.desc}`;
+  
+  // 更新配色信息
+  document.getElementById('paletteTitle').textContent = `🎨 ${data.name} · 配色方案`;
+  document.getElementById('paletteSwatches').innerHTML = data.swatches.map(s => 
+    `<div class="palette-swatch" style="background:${s.bg}">
+      <div class="name">${s.name}</div>
+      <div class="hex">${s.hex}</div>
+    </div>`
+  ).join('');
+  document.getElementById('paletteFeatures').innerHTML = data.features.map(f => 
+    `<span class="palette-feature">${f}</span>`
+  ).join('');
+}
+
+// 初始化配色信息
+switchTheme('vibrant', document.querySelector('.theme-tab.active'));
+</script>
+
+</body>
+</html>
