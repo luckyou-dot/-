@@ -1,187 +1,161 @@
 # 记一笔 (JiYiBi)
 
-一款基于 Kotlin + Jetpack Compose 的 Android 个人记账应用。采用 Material 3 设计语言，支持多主题切换、OCR 小票识别、周期性记账、预算管理、债务追踪等丰富功能。
+一款简洁优雅的 Android 个人记账应用，基于 Kotlin + Jetpack Compose 构建，采用 Material Design 3 设计语言，支持多种记账场景和丰富的数据可视化。
 
 ## 功能特性
+    
+### 核心记账
+- **收支记录** — 支持支出、收入、转账三种交易类型
+- **分类管理** — 自定义收支分类，支持自定义图标和颜色
+- **账户管理** — 现金、银行卡、支付宝、微信、信用卡等多种账户类型
+- **标签系统** — 为交易添加自定义标签，便于分类检索
 
-### 记账核心
+### 智能功能
+- **OCR 小票识别** — 基于 ML Kit 中文文字识别，拍照自动提取金额
+- **周期性记账** — 设置每日/每周/每月/每年自动记录规则
+- **智能通知解析** — 自动识别微信、支付宝、银行支付通知
 
-- **收支记录**：支持支出、收入、转账三种交易类型，以「分」为精度存储避免浮点误差
-- **OCR 小票识别**：集成 ML Kit 中文文字识别，拍照自动提取小票/发票金额，快速完成记账
-- **多账户管理**：支持现金、支付宝、微信、银行卡、信用卡等多种账户类型，独立维护余额
-- **分类体系**：预置 8 个支出分类 + 9 个收入分类，支持自定义分类，每个分类独立图标与配色
-- **标签系统**：为交易添加自定义标签，灵活归类
+### 数据可视化
+- **日历热力图** — 按月展示每日支出强度，颜色深浅直观反映消费情况
+- **统计图表** — 日/周/月/年多维度统计，分类占比、账户占比、趋势折线图
+- **预算追踪** — 实时预算进度，超支提醒
+- **年度回顾** — 年度消费总结与回顾
 
-### 预算管理
+### 数据管理
+- **备份导出** — 支持 CSV 格式数据导出，UTF-8 BOM 确保 Excel 兼容
+- **搜索功能** — 全文搜索交易记录
+- **借贷追踪** — 记录借贷往来，支持还款管理
 
-- **总预算与分类预算**：支持设置月度总预算或按分类设定预算上限
-- **超支预警**：预算进度达 80% 时自动变色提醒，超支后红色高亮
-- **首页预算进度**：Hero 区实时显示本月预算使用进度
+### 个性化
+- **多主题切换** — 薄荷绿、活力紫、日落橙、莫兰迪灰 4 种主题风格
+- **渐变 Hero 设计** — 首页、统计、我的页面采用渐变背景 + 毛玻璃卡片
+- **流畅动画** — 数字滚动、进度条动效、列表入场动画、页面转场
 
-### 统计分析
+## 技术栈
 
-- **多维度统计**：支持日、周、月、年四种统计周期
-- **分类饼图**：按分类汇总收支占比
-- **趋势折线图**：展示收支随时间变化趋势
-- **月度柱状图**：对比各月收支情况
-- **日历热力图**：首页展示当月每日支出强度，点击可查看当日明细
-
-### 周期性记账
-
-- **自动记账**：支持按日、周、月、年设置周期性交易规则
-- **自动入账**：开启 autoRecord 后，WorkManager 后台自动执行到期规则并调整账户余额
-- **灵活间隔**：可自定义执行间隔（如每 2 周、每 3 个月）
-
-### 债务管理
-
-- **借出 / 欠入**：区分「别人欠我」和「我欠别人」两种方向
-- **到期提醒**：支持设置还款日期
-- **结清标记**：一键标记债务已结清
-
-### 其他功能
-
-- **年度回顾**：生成年度账单海报，支持分享
-- **数据导出**：CSV 格式导出交易记录，兼容 Excel 直接打开
-- **搜索功能**：按备注、分类、金额等条件快速检索交易
-- **多主题切换**：内置多套主题配色（薄荷清新、经典蓝等），支持深色模式
-- **桌面小组件**：基于 Glance 的 App Widget，桌面快捷查看今日支出
-
-## 技术架构
-
-### 技术栈
-
-| 类别 | 技术 |
+| 分类 | 技术 |
 |------|------|
-| 语言 | Kotlin 2.0 |
-| UI 框架 | Jetpack Compose + Material 3 |
-| 数据库 | Room 2.6 |
-| 依赖注入 | Hilt 2.51 |
-| 注解处理 | KSP 2.0 |
-| 后台任务 | WorkManager 2.9 |
-| OCR | ML Kit Text Recognition (Chinese) |
-| 图表 | Vico 2.0 |
-| 图片加载 | Coil 2.6 |
-| 桌面组件 | Glance 1.1 |
-| 偏好存储 | DataStore Preferences |
-| 二维码 | ZXing 3.5 |
+| **语言** | Kotlin |
+| **UI 框架** | Jetpack Compose + Material 3 |
+| **架构模式** | MVVM + Clean Architecture |
+| **依赖注入** | Hilt + KSP |
+| **本地数据库** | Room (v2) |
+| **异步处理** | Kotlin Coroutines + Flow |
+| **后台任务** | WorkManager |
+| **OCR 识别** | ML Kit Chinese Text Recognition |
+| **图表库** | Vico Charts |
+| **图片加载** | Coil |
+| **桌面小组件** | Glance |
+| **数据存储** | DataStore Preferences |
+| **导航** | Navigation Compose |
 
-### 架构模式
-
-采用 **MVVM + Clean Architecture** 分层架构：
+## 项目结构
 
 ```
-com.jiyibi.app/
-├── core/                    # 核心层
-│   ├── backup/              # 数据导出（CSV）
-│   ├── common/              # 通用工具（TimeRange）
-│   ├── data/                # 数据层实现
-│   │   └── repository/      # Repository 实现
-│   ├── database/            # Room 数据库
-│   │   ├── dao/             # 数据访问对象
-│   │   └── entity/          # 数据库实体
-│   ├── designsystem/        # 设计系统
-│   │   ├── component/       # 通用组件（GlassCard, AnimatedNumber 等）
-│   │   └── theme/           # 主题配色与排版
-│   ├── domain/              # 领域层
-│   │   ├── model/           # 领域模型与枚举
-│   │   └── repository/      # Repository 接口
-│   ├── ml/                  # 机器学习（OCR）
-│   └── work/                # 后台任务（周期记账）
-├── di/                      # Hilt 依赖注入模块
-├── nav/                     # 导航路由定义
-└── ui/                      # UI 层
-    ├── account/             # 账户管理
-    ├── backup/              # 备份导出
-    ├── budget/              # 预算管理
-    ├── category/            # 分类管理
-    ├── debt/                # 债务管理
-    ├── home/                # 首页
-    ├── recurring/           # 周期性记账
-    ├── search/              # 搜索
-    ├── settings/            # 设置（主题/关于/反馈）
-    ├── statistics/          # 统计分析
-    ├── tag/                 # 标签管理
-    ├── transaction/         # 交易编辑
-    └── yearreview/          # 年度回顾
+app/src/main/java/com/jiyibi/app/
+├── core/                          # 核心业务层
+│   ├── backup/                    # 数据备份导出
+│   ├── common/                    # 通用工具（TimeRange）
+│   ├── data/                      # 数据层
+│   │   ├── repository/            # Repository 实现
+│   │   └── Mapper.kt              # Entity ↔ Domain 映射
+│   ├── database/                  # Room 数据库
+│   │   ├── dao/                   # 数据访问对象
+│   │   └── entity/                # 数据库实体
+│   ├── designsystem/              # 设计系统
+│   │   ├── component/             # 统一组件（GlassCard, AnimatedNumber 等）
+│   │   └── theme/                 # 主题、颜色、字体
+│   ├── domain/                    # 领域层
+│   │   ├── model/                 # 领域模型 & 枚举
+│   │   └── repository/            # Repository 接口
+│   ├── ml/                        # 机器学习（OCR）
+│   └── work/                      # WorkManager 任务
+├── di/                            # Hilt 依赖注入模块
+├── nav/                           # 导航路由定义
+└── ui/                            # 界面层
+    ├── account/                   # 账户管理
+    ├── backup/                    # 备份导出
+    ├── budget/                    # 预算管理
+    ├── category/                  # 分类管理
+    ├── debt/                      # 借贷记录
+    ├── home/                      # 首页
+    ├── recurring/                 # 周期性记账
+    ├── search/                    # 搜索
+    ├── settings/                  # 设置 & 个人中心
+    ├── statistics/                # 统计分析
+    ├── tag/                       # 标签管理
+    ├── transaction/               # 交易编辑
+    └── yearreview/                # 年度回顾
 ```
 
-### 数据模型
+## 数据库设计
 
-应用使用 6 张核心数据表：
+应用使用 Room 数据库（版本 2），包含 6 张核心表：
 
-| 实体 | 说明 |
+| 表名 | 说明 |
 |------|------|
-| `TransactionEntity` | 交易记录（支出/收入/转账） |
-| `AccountEntity` | 账户（含余额、类型、颜色） |
-| `CategoryEntity` | 分类（含图标、颜色、内置标记） |
-| `BudgetEntity` | 预算（支持总预算和分类预算） |
-| `RecurringRuleEntity` | 周期性记账规则 |
-| `DebtEntity` | 债务记录 |
+| `transactions` | 交易记录（金额以分存储） |
+| `accounts` | 账户信息 |
+| `categories` | 收支分类 |
+| `budgets` | 预算设置 |
+| `recurring_rules` | 周期性记账规则 |
+| `debts` | 借贷记录 |
 
-### 设计系统
+金额统一以「分」（Long 类型）存储，通过 `centsToYuan()` / `yuanToCents()` 进行元分转换，避免浮点精度问题。
 
-- **GlassCard**：毛玻璃效果卡片，用于首页 Hero 区
-- **UnifiedCard**：统一卡片组件，支持 ELEVATED / FILLED / OUTLINED 三种变体
-- **AnimatedNumber**：数字滚动动效组件
-- **AnimatedProgressIndicator**：进度条动效组件
-- **SwipeToDeleteItem**：滑动删除列表项
-- **EmptyState**：空状态占位组件
-- **渐变背景**：基于 LocalGradientColors 的主题渐变系统
+## 导航结构
+
+应用采用底部导航栏 + 二级页面的经典结构：
+
+**底部 Tab（4个）：**
+- 首页 — 日历热力图、最近交易、预算进度
+- 统计 — 日/周/月/年多维度数据分析
+- 预算 — 预算设置与进度追踪
+- 我的 — 资产看板、功能入口、主题设置
+
+**二级页面（9个）：**
+交易编辑、搜索、分类管理、账户管理、周期记账、借贷记录、标签管理、备份导出、年度回顾
 
 ## 环境要求
 
 - Android Studio Hedgehog (2023.1.1) 或更高版本
 - JDK 17
-- Android SDK 34（compileSdk / targetSdk）
-- minSdk 26（Android 8.0）
+- Android SDK 34
+- 最低支持 Android 8.0 (API 26)
 
 ## 构建与运行
 
 ```bash
 # 克隆项目
 git clone https://github.com/luckyou-dot/-.git
-cd jiyibi
 
-# 构建 Debug APK
+# 使用 Android Studio 打开项目
+# 或命令行构建
 ./gradlew assembleDebug
-
-# 安装到连接的设备
-./gradlew installDebug
 ```
 
-## 项目结构
+## 主要依赖版本
 
-```
-├── app/                          # 应用模块
-│   ├── build.gradle.kts          # 应用级构建配置
-│   ├── proguard-rules.pro        # 混淆规则
-│   └── src/main/
-│       ├── AndroidManifest.xml   # 应用清单
-│       ├── java/                 # Kotlin 源码
-│       └── res/                  # 资源文件
-├── design-preview/               # 设计预览（HTML）
-├── gradle/
-│   ├── libs.versions.toml        # 版本目录
-│   └── wrapper/                  # Gradle Wrapper
-├── build.gradle.kts              # 项目级构建配置
-├── settings.gradle.kts           # 项目设置
-└── gradle.properties             # Gradle 属性
-```
-
-## 权限说明
-
-| 权限 | 用途 |
+| 依赖 | 版本 |
 |------|------|
-| `CAMERA` | 拍照识别小票/发票（OCR） |
+| Kotlin | 2.0.0 |
+| Compose BOM | 2024.06.00 |
+| Room | 2.6.1 |
+| Hilt | 2.51.1 |
+| AGP | 8.13.2 |
+| KSP | 2.0.0-1.0.21 |
+| ML Kit Text | 16.0.0 |
+| Vico Charts | 2.0.0-alpha.21 |
+| Glance | 1.1.0 |
 
-## 预置数据
+## 设计亮点
 
-首次安装时自动初始化：
+- **渐变 Hero 区域** — 首页、统计、我的页面顶部采用主题渐变背景，搭配毛玻璃（GlassCard）汇总卡片
+- **AnimatedNumber** — 金额数字采用等宽字体 + 滚动动效，视觉流畅
+- **热力图日历** — 7 列网格按周排列，5 档主题色梯度反映支出强度
+- **贝塞尔曲线趋势图** — 平滑折线 + 渐变填充 + 光晕数据点，支持入场动画
+- **滑动删除** — 最近交易列表支持左滑删除
 
-- **4 个默认账户**：现金、支付宝、微信、银行卡
-- **8 个支出分类**：餐饮、交通、购物、娱乐、居住、医疗、教育、其他
-- **9 个收入分类**：工资、副业、理财收益、储蓄、退款、报销、红包礼金、中奖、其他
+## 许可证
 
-## License
-
-本项目仅供个人学习使用。
+本项目为个人学习项目。
