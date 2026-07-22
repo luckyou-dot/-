@@ -149,6 +149,8 @@ fun TransactionEditScreen(
     val expenseCategories by viewModel.expenseCategories.collectAsStateWithLifecycle()
     val incomeCategories by viewModel.incomeCategories.collectAsStateWithLifecycle()
     val editingTransaction by viewModel.editingTransaction.collectAsStateWithLifecycle()
+    val defaultExpenseAccountId by viewModel.defaultExpenseAccountId.collectAsStateWithLifecycle()
+    val defaultIncomeAccountId by viewModel.defaultIncomeAccountId.collectAsStateWithLifecycle()
 
     // 一键补记预填:从 navArg 读取并应用(仅首次进入生效)
     val prefill = viewModel.prefill
@@ -164,6 +166,9 @@ fun TransactionEditScreen(
     var selectedToAccountId by remember { mutableStateOf<Long?>(null) }
     var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
     var note by remember { mutableStateOf("") }
+
+    // 用户是否手动修改过账户：为 false 时切换收支类型会自动切换到对应默认账户
+    var userModifiedAccount by remember { mutableStateOf(false) }
 
     // 周期性记账开关与频率
     var recurringEnabled by remember { mutableStateOf(false) }
@@ -187,6 +192,8 @@ fun TransactionEditScreen(
             note = tx.note
             selectedTags.clear()
             selectedTags.addAll(tx.tags)
+            // 编辑模式账户来自交易数据,视为已确定,不被默认账户逻辑覆盖
+            userModifiedAccount = true
         }
     }
 
@@ -215,12 +222,21 @@ fun TransactionEditScreen(
         prefillNote?.let { note = it }
     }
 
-    // 账户默认选中:第一个作为支出/收入账户;第二个作为转账目标账户
-    LaunchedEffect(accounts) {
-        if (accounts.isNotEmpty() && selectedAccountId == null) {
-            selectedAccountId = accounts.first().id
+    // 账户默认选中:根据收支类型选择对应默认账户,失效(未设置/被删除)时回退到列表第一个
+    LaunchedEffect(accounts, defaultExpenseAccountId, defaultIncomeAccountId) {
+        if (accounts.isEmpty()) return@LaunchedEffect
+        // 用户已手动修改账户或编辑模式已加载交易,不覆盖账户选择
+        if (userModifiedAccount) return@LaunchedEffect
+        // 根据当前收支类型取默认账户 id
+        val defaultId = if (currentType == TransactionType.EXPENSE) defaultExpenseAccountId else defaultIncomeAccountId
+        // 默认账户失效(被删除/未设置)时回退到列表第一个
+        selectedAccountId = if (defaultId != null && accounts.any { it.id == defaultId }) {
+            defaultId
+        } else {
+            accounts.first().id
         }
-        if (accounts.size > 1 && selectedToAccountId == null) {
+        // 转账目标账户默认取第二个账户(与原逻辑一致)
+        if (selectedToAccountId == null && accounts.size > 1) {
             selectedToAccountId = accounts.getOrNull(1)?.id
         }
     }
@@ -347,6 +363,19 @@ fun TransactionEditScreen(
                                     currentType = type
                                     // 切换类型时清空分类
                                     selectedCategoryId = null
+                                    // 用户未手动修改账户时,自动切换到对应默认账户
+                                    if (!userModifiedAccount && accounts.isNotEmpty()) {
+                                        val defaultId = if (type == TransactionType.EXPENSE) {
+                                            defaultExpenseAccountId
+                                        } else {
+                                            defaultIncomeAccountId
+                                        }
+                                        selectedAccountId = if (defaultId != null && accounts.any { it.id == defaultId }) {
+                                            defaultId
+                                        } else {
+                                            accounts.first().id
+                                        }
+                                    }
                                 },
                                 shape = SegmentedButtonDefaults.itemShape(idx, 2),
                             ) {
@@ -427,7 +456,11 @@ fun TransactionEditScreen(
                     AccountSelector(
                         accounts = accounts,
                         selectedId = selectedAccountId,
-                        onSelect = { selectedAccountId = it },
+                        onSelect = {
+                            selectedAccountId = it
+                            // 标记用户已手动修改账户,后续切换收支类型不再自动切换
+                            userModifiedAccount = true
+                        },
                     )
                     Spacer(Modifier.height(Spacing.s))
                     // 5. 日期选择

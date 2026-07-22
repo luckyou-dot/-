@@ -2,9 +2,12 @@ package com.jiyibi.app.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jiyibi.app.core.domain.model.Account
 import com.jiyibi.app.core.domain.model.Category
 import com.jiyibi.app.core.domain.model.Transaction
+import com.jiyibi.app.core.domain.model.TransactionType
 import com.jiyibi.app.core.domain.model.yuanToCents
+import com.jiyibi.app.core.domain.repository.AccountRepository
 import com.jiyibi.app.core.domain.repository.CategoryRepository
 import com.jiyibi.app.core.domain.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,6 +31,9 @@ data class SearchFilters(
     val minAmount: Long? = null,   // 元
     val maxAmount: Long? = null,   // 元
     val categoryIds: Set<Long> = emptySet(),
+    val accountIds: Set<Long> = emptySet(),
+    val tags: Set<String> = emptySet(),
+    val types: Set<TransactionType> = emptySet(),
 )
 
 /** 搜索页 UI 状态 */
@@ -34,6 +41,8 @@ data class SearchUiState(
     val filters: SearchFilters = SearchFilters(),
     val results: List<Transaction> = emptyList(),
     val categories: List<Category> = emptyList(),
+    val accounts: List<Account> = emptyList(),
+    val existingTags: List<String> = emptyList(),
     val isLoading: Boolean = false,
 )
 
@@ -41,14 +50,32 @@ data class SearchUiState(
 class SearchViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
+    private val accountRepository: AccountRepository,
 ) : ViewModel() {
 
     private val _filters = MutableStateFlow(SearchFilters())
 
+    /** 全部历史标签：聚合所有交易的 tags（去重、按使用次数降序），供标签筛选展示 */
+    private val existingTags: StateFlow<List<String>> = transactionRepository
+        .observeRange(0L, Long.MAX_VALUE)
+        .map { txs ->
+            txs.flatMap { it.tags }
+                .groupingBy { it }
+                .eachCount()
+                .entries
+                .sortedByDescending { it.value }
+                .map { it.key }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList(),
+        )
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<SearchUiState> = _filters
         .flatMapLatest { filters ->
-            // search() 处理 keyword/日期/金额区间；categoryIds 在内存过滤
+            // search() 处理 keyword/日期/金额区间；categoryIds/accountIds/tags/types 在内存过滤
             combine(
                 transactionRepository.search(
                     keyword = filters.keyword,
@@ -58,10 +85,16 @@ class SearchViewModel @Inject constructor(
                     maxAmount = filters.maxAmount?.toDouble()?.yuanToCents(),
                 ),
                 categoryRepository.observeAll(),
-            ) { raw, categories ->
-                val filtered = if (filters.categoryIds.isEmpty()) raw
-                               else raw.filter { it.categoryId in filters.categoryIds }
-                SearchUiState(filters, filtered, categories, false)
+                accountRepository.observeAll(),
+                existingTags,
+            ) { raw, categories, accounts, tags ->
+                // 内存多维度过滤：分类 / 账户 / 标签 / 收支类型
+                val filtered = raw
+                    .filterBy(filters.categoryIds) { it.categoryId }
+                    .filterBy(filters.accountIds) { it.accountId }
+                    .filterByTags(filters.tags)
+                    .filterByTypes(filters.types)
+                SearchUiState(filters, filtered, categories, accounts, tags, false)
             }
         }
         .stateIn(
@@ -83,10 +116,19 @@ class SearchViewModel @Inject constructor(
     }
 
     fun toggleCategory(id: Long) {
-        _filters.update { f ->
-            val newSet = if (id in f.categoryIds) f.categoryIds - id else f.categoryIds + id
-            f.copy(categoryIds = newSet)
-        }
+        _filters.update { f -> f.copy(categoryIds = f.categoryIds.toggle(id)) }
+    }
+
+    fun toggleAccount(id: Long) {
+        _filters.update { f -> f.copy(accountIds = f.accountIds.toggle(id)) }
+    }
+
+    fun toggleTag(tag: String) {
+        _filters.update { f -> f.copy(tags = f.tags.toggle(tag)) }
+    }
+
+    fun toggleType(type: TransactionType) {
+        _filters.update { f -> f.copy(types = f.types.toggle(type)) }
     }
 
     fun clearFilters() {
@@ -97,3 +139,19 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch { transactionRepository.delete(id) }
     }
 }
+
+/** Set 的 toggle 辅助：存在则移除，不存在则添加 */
+private fun <T> Set<T>.toggle(item: T): Set<T> =
+    if (item in this) this - item else this + item
+
+/** 按 id 集合过滤：集合为空表示不限制 */
+private inline fun <T> List<T>.filterBy(ids: Set<Long>, selector: (T) -> Long?): List<T> =
+    if (ids.isEmpty()) this else filter { selector(it) in ids }
+
+/** 按标签过滤：交易需包含所有选中标签（AND 关系） */
+private fun List<Transaction>.filterByTags(tags: Set<String>): List<Transaction> =
+    if (tags.isEmpty()) this else filter { tx -> tags.all { it in tx.tags } }
+
+/** 按收支类型过滤 */
+private fun List<Transaction>.filterByTypes(types: Set<TransactionType>): List<Transaction> =
+    if (types.isEmpty()) this else filter { it.type in types }

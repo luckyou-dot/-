@@ -153,6 +153,9 @@ fun SearchScreen(
                         viewModel.updateAmountRange(state.filters.minAmount, it.toLongOrNull())
                     },
                     onToggleCategory = viewModel::toggleCategory,
+                    onToggleAccount = viewModel::toggleAccount,
+                    onToggleTag = viewModel::toggleTag,
+                    onToggleType = viewModel::toggleType,
                     onPickStart = { showStartPicker = true },
                     onPickEnd = { showEndPicker = true },
                     onClear = {
@@ -242,7 +245,7 @@ fun SearchScreen(
 }
 
 /**
- * 筛选面板：分类多选 + 日期范围 + 金额范围 + 清除按钮
+ * 筛选面板：分类 / 账户 / 收支类型 / 标签 多选 + 日期范围 + 金额范围 + 清除按钮
  *
  * 外层使用 [UnifiedCard] 的 [UnifiedCardVariant.OUTLINED] 变体包裹，
  * 内部按段落纵向排列，紧凑布局以节省空间。
@@ -256,6 +259,9 @@ private fun FilterPanel(
     onMinAmountChange: (String) -> Unit,
     onMaxAmountChange: (String) -> Unit,
     onToggleCategory: (Long) -> Unit,
+    onToggleAccount: (Long) -> Unit,
+    onToggleTag: (String) -> Unit,
+    onToggleType: (TransactionType) -> Unit,
     onPickStart: () -> Unit,
     onPickEnd: () -> Unit,
     onClear: () -> Unit,
@@ -269,6 +275,27 @@ private fun FilterPanel(
         cornerRadius = Corner.large,
         contentPadding = PaddingValues(Spacing.s),
     ) {
+        // 收支类型多选：支出 / 收入 / 转账
+        Text("收支类型", style = MaterialTheme.typography.labelMedium)
+        FlowRow(
+            modifier = Modifier.padding(top = Spacing.xs),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            maxItemsInEachRow = 5,
+        ) {
+            TransactionType.entries.forEach { type ->
+                FilterChip(
+                    selected = type in state.filters.types,
+                    onClick = { onToggleType(type) },
+                    label = {
+                        Text(type.displayLabel(), style = MaterialTheme.typography.labelSmall)
+                    },
+                )
+            }
+        }
+
+        Spacer(Modifier.size(Spacing.s))
+
         // 分类多选：FlowRow + FilterChip（紧凑模式）
         Text("分类", style = MaterialTheme.typography.labelMedium)
         FlowRow(
@@ -288,6 +315,49 @@ private fun FilterPanel(
                         )
                     },
                 )
+            }
+        }
+
+        Spacer(Modifier.size(Spacing.s))
+
+        // 账户多选
+        Text("账户", style = MaterialTheme.typography.labelMedium)
+        FlowRow(
+            modifier = Modifier.padding(top = Spacing.xs),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            maxItemsInEachRow = 5,
+        ) {
+            state.accounts.forEach { account ->
+                FilterChip(
+                    selected = account.id in state.filters.accountIds,
+                    onClick = { onToggleAccount(account.id) },
+                    label = {
+                        Text(account.name, style = MaterialTheme.typography.labelSmall)
+                    },
+                )
+            }
+        }
+
+        // 标签多选（仅当存在历史标签时显示）
+        if (state.existingTags.isNotEmpty()) {
+            Spacer(Modifier.size(Spacing.s))
+            Text("标签", style = MaterialTheme.typography.labelMedium)
+            FlowRow(
+                modifier = Modifier.padding(top = Spacing.xs),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                maxItemsInEachRow = 5,
+            ) {
+                state.existingTags.forEach { tag ->
+                    FilterChip(
+                        selected = tag in state.filters.tags,
+                        onClick = { onToggleTag(tag) },
+                        label = {
+                            Text(tag, style = MaterialTheme.typography.labelSmall)
+                        },
+                    )
+                }
             }
         }
 
@@ -387,6 +457,13 @@ private fun FilterPanel(
             }
         }
     }
+}
+
+/** 交易类型 → 中文标签（用于筛选面板展示） */
+private fun TransactionType.displayLabel(): String = when (this) {
+    TransactionType.EXPENSE -> "支出"
+    TransactionType.INCOME -> "收入"
+    TransactionType.TRANSFER -> "转账"
 }
 
 /**

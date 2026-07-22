@@ -3,8 +3,10 @@ package com.jiyibi.app.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jiyibi.app.core.common.TimeRange
+import com.jiyibi.app.core.data.repository.AccountPreferencesRepository
 import com.jiyibi.app.core.data.repository.ThemeRepository
 import com.jiyibi.app.core.designsystem.theme.AppTheme
+import com.jiyibi.app.core.domain.model.Account
 import com.jiyibi.app.core.domain.model.DebtDirection
 import com.jiyibi.app.core.domain.model.TransactionType
 import com.jiyibi.app.core.domain.repository.AccountRepository
@@ -50,6 +52,7 @@ class SettingsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val debtRepository: DebtRepository,
     private val themeRepository: ThemeRepository,
+    private val accountPreferencesRepository: AccountPreferencesRepository,
 ) : ViewModel() {
 
     /** 当前应用主题（持久化于 DataStore，初始默认 [AppTheme.MINT]） */
@@ -59,6 +62,28 @@ class SettingsViewModel @Inject constructor(
     /** 切换应用主题并持久化 */
     fun setTheme(theme: AppTheme) {
         viewModelScope.launch { themeRepository.setTheme(theme) }
+    }
+
+    /** 全部账户列表（未归档），供「默认账户」选择器使用 */
+    val accounts: StateFlow<List<Account>> = accountRepository.observeAll()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    /** 默认支出账户 id（未设置或失效时为 null，由 UI 回退到列表第一个） */
+    val defaultExpenseAccountId: StateFlow<Long?> = accountPreferencesRepository.defaultExpenseAccountId
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    /** 默认收入账户 id（未设置或失效时为 null，由 UI 回退到列表第一个） */
+    val defaultIncomeAccountId: StateFlow<Long?> = accountPreferencesRepository.defaultIncomeAccountId
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    /** 设置默认支出账户；传入 null 清除设置 */
+    fun setDefaultExpenseAccount(id: Long?) {
+        viewModelScope.launch { accountPreferencesRepository.setDefaultExpenseAccount(id) }
+    }
+
+    /** 设置默认收入账户；传入 null 清除设置 */
+    fun setDefaultIncomeAccount(id: Long?) {
+        viewModelScope.launch { accountPreferencesRepository.setDefaultIncomeAccount(id) }
     }
 
     val assetBoard: StateFlow<AssetBoard> = combine(

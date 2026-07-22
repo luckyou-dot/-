@@ -3,6 +3,7 @@ package com.jiyibi.app.ui.transaction
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jiyibi.app.core.data.repository.AccountPreferencesRepository
 import com.jiyibi.app.core.domain.model.Account
 import com.jiyibi.app.core.domain.model.Category
 import com.jiyibi.app.core.domain.model.CategoryKind
@@ -35,6 +36,7 @@ class TransactionEditViewModel @Inject constructor(
     private val debtRepository: DebtRepository,
     private val recurringRepository: RecurringRepository,
     private val ocrHandler: OcrResultHandler,
+    private val accountPreferencesRepository: AccountPreferencesRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -56,6 +58,22 @@ class TransactionEditViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList(),
+        )
+
+    /** 默认支出账户 id（未设置或失效时为 null，由 Screen 回退到列表第一个） */
+    val defaultExpenseAccountId: StateFlow<Long?> = accountPreferencesRepository.defaultExpenseAccountId
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
+        )
+
+    /** 默认收入账户 id（未设置或失效时为 null，由 Screen 回退到列表第一个） */
+    val defaultIncomeAccountId: StateFlow<Long?> = accountPreferencesRepository.defaultIncomeAccountId
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
         )
 
     /** 支出分类列表 */
