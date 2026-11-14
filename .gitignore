@@ -1,0 +1,21 @@
+# 临时脚本与下载产物
+_tmp_*.py
+_tmp_contacts/
+_tmp_photos/
+__pycache__/
+*.pyc
+
+# 备份与内部工作目录
+_backup/
+.tmp/
+.arts/
+.codeartsdoer/
+
+# 系统文件
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# 素材临时文件
+assets/photos/_contact.jpg
+assets/photos/_test_write.txt

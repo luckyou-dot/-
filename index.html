@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f1efea">
+  <meta name="description" content="出来去哪玩：发现城市里好玩的地点，找搭子一起出门。">
+  <title>出来去哪玩 · 城市漫游手册</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css?v=stage15-fullscreen">
+</head>
+<body>
+  <div class="app-shell">
+    <header id="app-header"></header>
+
+    <main id="view-root"></main>
+
+    <nav id="tabbar" aria-label="主导航">
+      <a class="tab" data-tab="home" href="#/home">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M3.5 10.5 12 3.5l8.5 7V20.5H3.5z"/><path d="M9.5 20.5v-6h5v6"/></svg>
+        </span>
+        <span class="tab-label">首页</span>
+      </a>
+      <a class="tab" data-tab="whereto" href="#/whereto">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><circle cx="8.3" cy="8.3" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="15.7" cy="15.7" r="1" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="tab-label">去哪</span>
+      </a>
+      <a class="tab tab-publish" data-tab="publish" href="#/publish">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        <span class="tab-label">发布</span>
+      </a>
+      <a class="tab" data-tab="buddies" href="#/buddies">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="9" cy="8.6" r="3.2"/><path d="M3.4 20c.5-3.6 2.7-5.4 5.6-5.4s5.1 1.8 5.6 5.4"/><circle cx="17.2" cy="8" r="2.2"/><path d="M16.4 14.2c2.3.3 3.9 1.9 4.2 4.6"/></svg>
+        </span>
+        <span class="tab-label">搭子</span>
+      </a>
+      <a class="tab" data-tab="profile" href="#/profile">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><circle cx="12" cy="8" r="3.6"/><path d="M5 20.2c.6-4 3.3-6.2 7-6.2s6.4 2.2 7 6.2"/></svg>
+        </span>
+        <span class="tab-label">我的</span>
+      </a>
+    </nav>
+  </div>
+
+  <div id="toast-layer"></div>
+
+  <!-- 地图外部脚本：高德 JS API 优先，Leaflet 为降级依赖，均不可用时 W.MapView 自动降级为 SVG 示意图 -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="js/ui.js?v=stage15-publish-photo"></script>
+  <script src="js/store.js"></script>
+  <script src="js/seed-play-a.js?v=stage13-play"></script>
+  <script src="js/seed-play-b.js?v=stage13-play"></script>
+  <script src="js/seed-play-c.js?v=stage13-play"></script>
+  <script src="js/seed.js?v=stage13-play"></script>
+  <script src="js/location.js?v=stage14-session"></script>
+  <script src="js/map.js?v=stage13-me"></script>
+  <script src="js/views/home.js?v=stage14-clean"></script>
+  <script src="js/views/whereto.js?v=stage15-fullscreen"></script>
+  <script src="js/views/publish.js?v=stage14-city"></script>
+  <script src="js/views/detail.js?v=stage13-gznearby2"></script>
+  <script src="js/views/buddies.js"></script>
+  <script src="js/views/buddyDetail.js"></script>
+  <script src="js/views/profile.js?v=stage14-city"></script>
+  <script src="js/app.js?v=stage15-no-location"></script>
+</body>
+</html>
